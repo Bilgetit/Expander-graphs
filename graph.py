@@ -3,6 +3,10 @@ import time as time
 from hashlib import sha1
 from numba import njit
 
+
+"""
+class that makes a numpy array hashable, so that it can be used as an element in a set (or key in a dictionary)
+"""
 class HashableNdarray(np.ndarray):
     @classmethod
     def create(cls, array):
@@ -19,8 +23,8 @@ class HashableNdarray(np.ndarray):
         return super().__eq__(super(HashableNdarray, other)).all()
 
 ## Parameters
-n = 3   # size of matrix
-p = 3  # Z/pZ
+n = 3           # size of matrix
+p = 3           # Z/pZ
 m = int(1E3)    # number of matrices to generate
 
 
@@ -33,7 +37,39 @@ edges = [A, Ai, B, Bi]
 
 # print(A, Ai, B, Bi, sep="\n")
 
+    
 
+"""
+function that generates a random matrix of size n x n
+with entries in the field Z_p, where p is a prime number
+with determinant equal to 1 (mod p)
+"""
+# @njit()
+def generate_matrix(n, p):
+    X = np.random.randint(0, high=p, size=(n,n))        # nxn-matrix with random entries between 0 and p-1
+
+    while check_matrix(X) == False:    # only let pass given that we can make the determinant 1 (mod p)
+        X = np.random.randint(0, high=p, size=(n,n))  
+
+    a = X[0][0]
+    b = X[0][1]
+    c = X[0][2]
+    d = X[1][0]
+    e = X[1][1]
+    f = X[1][2]
+    g = X[2][0]
+    h = X[2][1]
+    i = X[2][2]
+
+    i = (-b*f*g - c*d*h + c*e*g + a*f*h + 1) / (a*e - b*d)      # calculate the last entry of the matrix so that the determinant is 1 (mod p)
+    i = i%p                                                     # make the last entry be in the field Z_p 
+    X[2][2] = i                                                 # set the last entry of the matrix to i  
+    return X
+
+
+"""
+helper function for generatematrix that checks if a matrix has determinant 1 (mod p)
+"""
 @njit()
 def check_matrix(X):
     a = X[0][0]
@@ -46,48 +82,16 @@ def check_matrix(X):
     h = X[2][1]
     i = X[2][2]
 
-    if (a*e - b*d) % p == 0:
+    if (a*e - b*d) % p == 0:            # make sure we don't divide by 0 
         return False
     
     i = (-b*f*g - c*d*h + c*e*g + a*f*h + 1) / (a*e - b*d)
 
-    # if i > 0 and i < p and i-int(i) < 0.0000000001:
-    if abs(i-int(i)) < 0.0000000001:
+    if abs(i-int(i)) < 0.0000000001:            # make sure that i is an integer
         return True
-
     else: 
         return False
-    
-"""
-function that generates a random matrix of size n x n
-with entries in the field Z_p, where p is a prime number
-with determinant equal to 1 (mod p)
-"""
-# @njit()
-def generate_matrix(n, p, count=0):
-    X = np.random.randint(0, high=p, size=(n,n))  
 
-    while check_matrix(X) == False:
-        X = np.random.randint(0, high=p, size=(n,n))  
-        count += 1 
-
-    a = X[0][0]
-    b = X[0][1]
-    c = X[0][2]
-    d = X[1][0]
-    e = X[1][1]
-    f = X[1][2]
-    g = X[2][0]
-    h = X[2][1]
-    i = X[2][2]
-
-    i = (-b*f*g - c*d*h + c*e*g + a*f*h + 1) / (a*e - b*d)
-    i = i%p
-    X[2][2] = i
-    # print(X)
-    # print(np.linalg.det(X))
-
-    return X, count
 
 """
 function that generates a set of matrices of size n x n
@@ -96,88 +100,84 @@ with determinant equal to 1 (mod p)
 """
 def generate_set(m, func, s = None, n=3, p=11):
     s = set()
-    for i in range(m):
-        X, _ = func(n, p, count=0)      # func = generate_matrix
-        # X_hashable = map(tuple, X)
-        s.add(X.view(HashableNdarray))
-        # s.add(HashableNdarray.create(X))
+    for i in range(m):                  # m = number of matrices to generate
+        X= func(n, p)               # func = generate_matrix
+        s.add(X.view(HashableNdarray))  # add the matrix to the set
     return s
 
-"""timer for the generate_matrix function
+"""
+timer for make one matrix, using the generate_matrix function
 """
 def time_matrix(func):
-    count = 0
     t0 = time.time()
-    X, count = func(n, p, count) 
+    X  = func(n, p) 
     t1 = time.time()
     print(X)
     print(f"det(X) = {np.linalg.det(X)}")     
-    print(f"{t1-t0=}")
-    print(f"{count=}")
+    print(f"{t1-t0=}")                      # time it takes to generate 1 matrix
 
-# print("random_matrix")
-# time_matrix(random_matrix)
-# print("\n")
-# print("generate_matrix")
+"""
+use this to time the generate_matrix function
+"""
+
+# print("time generate_matrix")
 # time_matrix(generate_matrix)
 # print("\n")
 
-""" timer for the generate_set function
+""" 
+timer for the generate_set function
 """
 def time_set(func1, func2):
     t0 = time.time()
-    my_set = func1(m, func2, n=n, p=p) 
+    my_set = func1(m, func2, n=n, p=p)          # func1 = generate_set, func2 = generate_matrix
     t1 = time.time()
     # print(s)
     print(f"{t1-t0=}")
     print(f"size of set = {len(my_set)}")
     print(f"{m=}")
 
-
-print("generate_matrix")
-time_set(generate_set, generate_matrix)
-
-""" function that adds edges to the boundary of a set
 """
-def add_edges(boundary, X):
-    # boundary.add(X.view(HashableNdarray))
-    for e in edges:
-        Xe = np.matmul(X, e)
-        for a in range(0, n):
+use this to time the generate_set function
+"""
+
+print("time generate_set")
+time_set(generate_set, generate_matrix)
+print("\n")
+
+""" 
+function that adds edges to the boundary of a set
+"""
+def add_edges(boundary, X, wrong):
+    for e in edges:                                             # edges = [A, Ai, B, Bi]
+        Xe = np.matmul(X, e)                                    # X*e or e*X? 
+        for a in range(0, n):                                   
             for b in range(0, n):
-                Xe[a][b] = Xe[a][b] % p
+                Xe[a][b] = Xe[a][b] % p                         # make sure that the entries are in the field Z_p
+
         boundary.add(Xe.view(HashableNdarray))
-    #     if abs((np.linalg.det(Xe.view(HashableNdarray)) % p) - 1) > 0.00000001:
-    #         wrong += 1
-        # print(Xe.view(HashableNdarray))
-        # print(np.linalg.det(Xe.view(HashableNdarray)))
-    # return wrong
-    # print(f"wrong = {wrong}")
+
+        if abs((np.linalg.det(Xe.view(HashableNdarray)) % p) - 1) > 0.00000001:    
+            wrong += 1          # if-statement to check if the determinant is 1 (and count the number of wrong matrices)
+    return wrong
 
                 
 
-""" function that returns the boundary of a set
+""" 
+function that returns the boundary of a set
 """
 def boundary_set(my_set):
-    wrong = 0
+    wrong = 0                                       # number of wrong matrices
     boundary = set()
-    for X in my_set:
+    for X in my_set:            
         boundary.add(X.view(HashableNdarray))
-        wrong = add_edges(boundary, X, wrong)
+        wrong = add_edges(boundary, X, wrong) 
     print(f"{wrong=}")
-    print(f"size of boundary = {len(boundary)}")
+    print(f"size of boundary = {len(boundary)}")    # actual size of boundary
     return boundary
 
-my_set = generate_set(m, generate_matrix, p=p)
-# copy = my_set.pop()
-# print(copy)
-boundary_set(my_set)
+"""
+use this to generate a set and calculate the boundary
+"""
 
-# def timeit(func):
-#     def wrapper(*args, **kwargs):
-#         t0 = time.time()
-#         result = func(*args, **kwargs)
-#         t1 = time.time()
-#         print(f"{t1-t0=}")
-#         return result
-#     return wrapper
+my_set = generate_set(m, generate_matrix, p=p)
+boundary_set(my_set)
