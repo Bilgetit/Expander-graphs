@@ -25,7 +25,7 @@ class HashableNdarray(np.ndarray):
 ## Parameters
 n = 3           # size of matrix
 p = 3           # Z/pZ
-m = int(1E3)    # number of matrices to generate
+m = int(1E4)    # number of matrices to generate
 
 
 # Set which generates SL(n, Z) (n = 3). Use these as edges in the graph
@@ -178,6 +178,12 @@ def boundary_set(my_set):
 """
 use this to generate a set and calculate the boundary
 """
+
+def check_set(my_set):
+    for X in my_set:
+        for a in range(0, n):
+            for b in range(0, n):
+                pass
 
 my_set = generate_set(m, generate_matrix, p=p)
 boundary_set(my_set)
