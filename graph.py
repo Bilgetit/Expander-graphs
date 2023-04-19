@@ -33,7 +33,7 @@ class HashableNdarray(np.ndarray):
 
 ## Parameters
 n = 3           # size of matrix
-p = 3           # Z/pZ
+p = 7           # Z/pZ
 # m = int(1E1)    # number of matrices to generate
 
 
