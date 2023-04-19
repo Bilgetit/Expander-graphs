@@ -147,11 +147,12 @@ def generate_set_bfs(s = set(), n=3, p=11):
     count = 0
     while queue:
         x = queue.popleft()
+        # x = x.view(HashableNdarray)
         s.add(x)
         count += 1
         for e in edges:
             Xe = np.matmul(x, e)
-            
+            Xe =  Xe % p
             if Xe not in s:
                 queue.append(Xe)
 
@@ -161,7 +162,7 @@ def generate_set_bfs(s = set(), n=3, p=11):
 
 def time_set_bfs():
     t0 = time.time()
-    print(type(edges_3[0]))
+    # print(type(edges_3[0]))
     # my_set = generate_set_bfs(s = set(edges_3[0].view(HashableNdarray)), n=n, p=p)
     my_set = generate_set_bfs(n=n, p=p)
     t1 = time.time()
@@ -227,11 +228,11 @@ def time_set_dfs():
     # print(my_set)                               # print the set
 
 
-print("time generate_set_bfs")
-time_set_bfs()
+# print("time generate_set_bfs")
+# time_set_bfs()
 
-# print("time generate_set_2")
-# time_set_2()
+print("time generate_set_2")
+time_set_2()
 
 print("time generate_set_dfs")
 time_set_dfs()
