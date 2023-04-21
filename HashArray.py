@@ -3,7 +3,7 @@ import numpy.typing as npt
 from hashlib import sha1
 from typing import TypeVar, Type
 
-HashArray = TypeVar('HashArray', bound='HashableNdarray')
+HashArray = TypeVar("HashArray", bound="HashableNdarray")
 
 
 class HashableNdarray(np.ndarray):
@@ -11,6 +11,7 @@ class HashableNdarray(np.ndarray):
     Class that makes a numpy array hashable, so that it can be used as an element
     in a set (or key in a dictionary)
     """
+
     @classmethod
     def create(cls: Type[HashArray], array: npt.NDArray[np.int_]) -> HashArray:
         return HashableNdarray(

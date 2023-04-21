@@ -1,10 +1,18 @@
 import numpy as np
 import time
 from collections import deque
+from typing import Optional
 
 
-def get_edges(n: int) -> np.ndarray:
+def get_edges(n: int, start_matrix: Optional[np.ndarray] = None) -> np.ndarray:
     "Starting edges of graph."
+    if start_matrix is not None:
+        if start_matrix.shape[0] != start_matrix.shape[1]:
+            raise ValueError(f"{start_matrix=} must be square.")
+        if not np.all(start_matrix >= 0):
+            raise ValueError(f"{start_matrix=} must be positive.")
+        return np.array([start_matrix])
+
     if n == 2:
         A_2 = np.array([[1, 1], [0, 1]])
         Ai_2 = np.array([[1, -1], [0, 1]])
@@ -28,16 +36,27 @@ def get_edges(n: int) -> np.ndarray:
 class Search:
     """Class for using a Breadth first search in order to find graph."""
 
-    def __init__(self, n: int = 3, p: int = 5, printing: bool = False):
+    def __init__(
+        self,
+        n: int = 3,
+        p: int = 5,
+        printing: bool = False,
+        stop: Optional[int] = None,
+        start_matrix: Optional[np.ndarray] = None,
+    ):
         self.n = n
         self.p = p
         self.s = set()
         self.printing = printing
-        self.edges = get_edges(n)
+        if start_matrix is not None:
+            self.edges = get_edges(n, start_matrix=start_matrix)
+        else:
+            self.edges = get_edges(n)
         self.count = 0
         self.quit = False
+        self.stop = stop
 
-    def do_work(self):
+    def do_work(self) -> None:
         x = self.queue.popleft()
 
         Xes = np.matmul(x, self.edges)
@@ -50,13 +69,17 @@ class Search:
                 self.s.add(Xe_tup)
                 self.queue.append(Xe)
 
-    def worker(self):
+    def worker(self) -> None:
         while self.queue:
             self.do_work()
 
+            if self.stop is not None and self.count >= self.stop:
+                self.quit = True
+                break
+
             self.count += 1
 
-            if self.count % 100000 == 0:
+            if self.count % 100000 == 0 and self.printing:
                 print(f"on number {self.count=}")
 
     def main(self):
@@ -75,6 +98,19 @@ def time_set_bfs():
     print(f"{t1-t0=}")
     print(f"size of set_bfs = {len(my_set)}")
     print("\n")
+
+
+def get_graph(
+    n: int,
+    p: int,
+    stop: Optional[int] = None,
+    start_matrix: Optional[np.ndarray] = None,
+    printing: bool = False,
+):
+    """Get graph of size n and prime p."""
+    instance = Search(n=n, p=p, stop=stop, printing=printing, start_matrix=start_matrix)
+    my_set = instance.main()
+    return my_set
 
 
 if __name__ == "__main__":

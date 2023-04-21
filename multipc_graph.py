@@ -38,7 +38,7 @@ class Search:
         self.count = 0
         self.quit = False
 
-    def do_work(self):
+    def do_work(self) -> None:
         x = self.queue.get_nowait()
 
         Xes = np.matmul(x, self.edges)
@@ -62,9 +62,9 @@ class Search:
             if name != "worker-0":
                 print(name)
             self.do_work()
-            
+
             if self.queue.qsize() == 0:
-                print('Hola')
+                print("Hola")
                 self.quit = True
             self.count += 1
 
@@ -72,9 +72,7 @@ class Search:
             #     print(f"{name} check {self.count}")
         return True
 
-    def tuple_generate_set_bfs(
-            s: set[tuple] = set(), n: int = 3, p: int = 11
-            ):
+    def tuple_generate_set_bfs(s: set[tuple] = set(), n: int = 3, p: int = 11):
         """Function for generating graph.
 
         Uses tuples in order to find unique matrices.
@@ -128,13 +126,12 @@ class Search:
         number_of_processes = 8
 
         for w in range(number_of_processes):
-            p = Process(name=f'worker-{w}', target=self.worker, args=(f'worker-{w}'))
+            p = Process(name=f"worker-{w}", target=self.worker, args=(f"worker-{w}"))
             self.processes.append(p)
             p.start()
 
         for p in self.processes:
             p.join()
-        
 
         # for task in self.tasks:
         #     task.cancel()

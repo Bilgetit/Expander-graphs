@@ -61,18 +61,16 @@ class Search:
             if name != "worker-0":
                 print(name)
             await self.do_work()
-            
+
             if self.queue.qsize() == 0:
-                print('Hola')
+                print("Hola")
                 self.quit = True
             self.count += 1
 
             # if self.count % 10001 == 0:
             #     print(f"{name} check {self.count}")
 
-    async def tuple_generate_set_bfs(
-            s: set[tuple] = set(), n: int = 3, p: int = 11
-            ):
+    async def tuple_generate_set_bfs(s: set[tuple] = set(), n: int = 3, p: int = 11):
         """Function for generating graph.
 
         Uses tuples in order to find unique matrices.

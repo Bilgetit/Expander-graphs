@@ -10,4 +10,5 @@ print(tuple(ra))
 def totuple(a):
     return tuple(map(tuple, a))
 
+
 print(totuple(ra))
