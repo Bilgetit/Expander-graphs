@@ -11,7 +11,7 @@ def estimate_c(
     n: int,
     p: int,
     times: int = 1000,
-    stop: Optional[int] = None,
+    end: Optional[int] = None,
     start_matrix: Optional[np.ndarray] = None,
 ) -> float:
     """Estimate c."""
@@ -19,7 +19,9 @@ def estimate_c(
     max = degree(n, p)
     c = []
     for _ in range(times):
-        if stop == None:
+        if end:
+            stop = random.randint(1, end)
+        else:
             stop = random.randint(1, max)
         start_matrix = random.choice(tuple(whole_graph))
         start_matrix = tuple2matrix(start_matrix, n)
@@ -29,4 +31,4 @@ def estimate_c(
     return c
 
 if __name__ == "__main__":
-    print(estimate_c(3, 5), times = 10)
+    print(estimate_c(3,3, times = 3))
