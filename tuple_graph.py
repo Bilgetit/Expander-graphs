@@ -3,21 +3,25 @@ import time
 from collections import deque
 from typing import Optional
 
+def check_start_matrix(n: int, p: int, start_matrix: np.ndarray) -> None:
+    # if start_matrix.shape[0] != start_matrix.shape[1]:
+    #     raise ValueError(f"{start_matrix=} must be square.")
+    # if not np.all(start_matrix >= 0):
+    #     raise ValueError(f"{start_matrix=} must be positive.")
+    if not np.linalg.det(start_matrix) % p == 1:
+        raise ValueError(f"{start_matrix=} must have determinant 1 mod {p}.")
 
-def get_edges(n: int, start_matrix: Optional[np.ndarray] = None) -> np.ndarray:
+def get_edges(n: int, p: int) -> np.ndarray:
     "Starting edges of graph."
-    if start_matrix is not None:
-        if start_matrix.shape[0] != start_matrix.shape[1]:
-            raise ValueError(f"{start_matrix=} must be square.")
-        if not np.all(start_matrix >= 0):
-            raise ValueError(f"{start_matrix=} must be positive.")
-        return np.array([start_matrix])
 
     if n == 2:
         A_2 = np.array([[1, 1], [0, 1]])
         Ai_2 = np.array([[1, -1], [0, 1]])
         B_2 = np.array([[0, 1], [-1, 0]])
         Bi_2 = np.array([[0, -1], [1, 0]])
+
+        Ai_2 %= p
+        Bi_2 %= p
 
         return np.array([A_2, Ai_2, B_2, Bi_2])
 
@@ -27,7 +31,11 @@ def get_edges(n: int, start_matrix: Optional[np.ndarray] = None) -> np.ndarray:
         B_3 = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
         Bi_3 = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
 
+        Ai_3 %= p
+        Bi_3 %= p
+
         return np.array([A_3, Ai_3, B_3, Bi_3])
+        # return np.array([A_3, B_3])
 
     else:
         raise ValueError(f"Not implemented for {n=}.")
@@ -47,11 +55,11 @@ class Search:
         self.n = n
         self.p = p
         self.s = set()
-        self.printing = printing
         if start_matrix is not None:
-            self.edges = get_edges(n, start_matrix=start_matrix)
-        else:
-            self.edges = get_edges(n)
+            self.s.add(tuple(np.ravel(start_matrix)))
+        self.printing = printing
+        self.start_matrix=start_matrix
+        self.edges = get_edges(n, p)
         self.count = 0
         self.quit = False
         self.stop = stop
@@ -79,11 +87,15 @@ class Search:
 
             self.count += 1
 
-            if self.count % 100000 == 0 and self.printing:
+            if self.count % 100_000 == 0 and self.printing:
                 print(f"on number {self.count=}")
 
     def main(self):
-        self.queue = deque(self.edges)
+        if self.start_matrix is not None:
+            # check_start_matrix(self.n, self.p, self.start_matrix)
+            self.queue = deque([self.start_matrix])
+        else:
+            self.queue = deque(self.edges)
 
         self.worker()
 
@@ -92,7 +104,7 @@ class Search:
 
 def time_set_bfs():
     t0 = time.time()
-    instance = Search(n=3, p=7)
+    instance = Search(n=2, p=101, printing=True)
     my_set = instance.main()
     t1 = time.time()
     print(f"{t1-t0=}")
@@ -115,3 +127,46 @@ def get_graph(
 
 if __name__ == "__main__":
     time_set_bfs()
+
+
+"""
+(MAT2000) Mikkels-MacBook-Pro:Expander-graphs mikkelgjestrud$ /opt/anaconda3/envs/MAT2000/bin/python /Users/mikkelgjestrud/Documents/Prosjekter/Expander-graphs/tuple_graph.py
+on number self.count=1000000
+on number self.count=2000000
+on number self.count=3000000
+on number self.count=4000000
+on number self.count=5000000
+on number self.count=6000000
+on number self.count=7000000
+on number self.count=8000000
+on number self.count=9000000
+on number self.count=10000000
+on number self.count=11000000
+on number self.count=12000000
+on number self.count=13000000
+on number self.count=14000000
+on number self.count=15000000
+on number self.count=16000000
+on number self.count=17000000
+on number self.count=18000000
+on number self.count=19000000
+on number self.count=20000000
+on number self.count=21000000
+on number self.count=22000000
+on number self.count=23000000
+on number self.count=24000000
+on number self.count=25000000
+on number self.count=26000000
+on number self.count=27000000
+on number self.count=28000000
+on number self.count=29000000
+on number self.count=30000000
+on number self.count=31000000
+on number self.count=32000000
+on number self.count=33000000
+on number self.count=34000000
+on number self.count=35000000
+on number self.count=36000000
+t1-t0=7521.402703046799
+size of set_bfs = 36846576
+"""

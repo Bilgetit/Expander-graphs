@@ -13,7 +13,7 @@ def find_boundary(
     """Find boundary of set."""
     if not subset:
         subset = get_graph(n, p, start_matrix=starting_matrix)
-    edges = get_edges(n, start_matrix=starting_matrix)
+    edges = get_edges(n, p)
     boundary: set[tuple] = set()
 
     for Xtup in subset:
