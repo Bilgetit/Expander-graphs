@@ -10,3 +10,8 @@ def degree(n, p):
         return (p**2+p+1)*(p**3-p)*(p**3-p**2)
     else:
         raise ValueError(f"Not implemented for {n=}.")
+    
+
+
+if __name__ == "__main__":
+    print(degree(3,5))
