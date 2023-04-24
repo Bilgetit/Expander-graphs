@@ -21,7 +21,7 @@ def get_edges(n: int, p: int) -> np.ndarray:
         Bi_2 = np.array([[0, -1], [1, 0]])
 
         Ai_2 %= p
-        Bi_2 %= p
+        B_2 %= p
 
         return np.array([A_2, Ai_2, B_2, Bi_2])
 
@@ -32,7 +32,6 @@ def get_edges(n: int, p: int) -> np.ndarray:
         Bi_3 = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
 
         Ai_3 %= p
-        Bi_3 %= p
 
         return np.array([A_3, Ai_3, B_3, Bi_3])
         # return np.array([A_3, B_3])
@@ -71,24 +70,31 @@ class Search:
         Xes %= self.p
 
         for Xe in Xes:
+            
             Xe_tup = tuple(np.ravel(Xe))
 
             if Xe_tup not in self.s:
                 self.s.add(Xe_tup)
                 self.queue.append(Xe)
+                self.count += 1
+
+                if self.count % 100_000 == 0 and self.printing:
+                    print(f"on number {self.count=}")
+
+
+                if self.stop is not None and self.count >= self.stop:
+                    self.quit = True
+                    break
+                
+
+            
 
     def worker(self) -> None:
         while self.queue:
             self.do_work()
 
-            if self.stop is not None and self.count >= self.stop:
-                self.quit = True
+            if self.quit:
                 break
-
-            self.count += 1
-
-            if self.count % 100_000 == 0 and self.printing:
-                print(f"on number {self.count=}")
 
     def main(self):
         if self.start_matrix is not None:
