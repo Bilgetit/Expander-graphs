@@ -5,16 +5,21 @@ import numpy as np
 
 
 def find_boundary(
-    subset: set[tuple] = None,
     n: int = 3,
     p: int = 5,
     starting_matrix: Optional[np.ndarray] = None,
+    subset: Optional[set[tuple]] = None,
+    size: Optional[int] = None,
 ) -> set[tuple]:
-    """Find boundary of set."""
+    """Find boundary of set. Return boundary as set of tuples, along with its size."""
     if not subset:
-        subset = get_graph(n, p, start_matrix=starting_matrix)
+        subset = get_graph(n, p, start_matrix=starting_matrix, stop = size)
     edges = get_edges(n, p)
-    boundary: set[tuple] = set()
+
+    if not size:
+        size = len(subset)
+
+    boundary = set(subset)
 
     for Xtup in subset:
         X = tuple2matrix(Xtup, n)
@@ -24,4 +29,5 @@ def find_boundary(
             Xe_tup = tuple(np.ravel(Xe))
             if Xe_tup not in boundary:
                 boundary.add(Xe_tup)
-    return boundary
+                size += 1
+    return boundary, size
