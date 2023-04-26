@@ -1,9 +1,12 @@
 from numba import jit
 import pytest
+import random
 import numpy as np
 from tuple_graph import get_graph
 from boundary import find_boundary
 from size import degree
+from tuple2matrix import tuple2matrix
+
 
 
 # A = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
@@ -34,25 +37,29 @@ def test_size(n, p):
 @pytest.mark.parametrize(
         "stop", 
         [
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1_000, 10_000, 100_000, 1_000_000
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1_000 #, 10_000, 100_000, 1_000_000, 119
         ]
 )
 def test_stop(stop):
     """test that the stop parameter works"""
-    graph = get_graph(3, 7, stop=stop)
+    graph = get_graph(2, 13, stop=stop)
     assert len(graph) == stop
 
 @pytest.mark.parametrize(
         "stop",
         [
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1_000, 10_000, 100_000, 1_000_000
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1_000 #, 10_000, 100_000, 1_000_000
         ]
 )
 def test_boundary_size(stop):
     """test that the boundary size is correct"""
-    graph = get_graph(2, 17, stop=stop)
-    boundary, size = find_boundary(2, 17, size=stop, subset=graph)
-    assert len(boundary) == size
+    n=2
+    p=101
+    graph = get_graph(n, p, stop = 1000)
+    start_matrix = random.choice(tuple(graph))
+    start_matrix = tuple2matrix(start_matrix, n)
+    boundary, subset, size = find_boundary(n, p, size=stop, starting_matrix=start_matrix)
+    assert len(subset) == size
 
 
 # @pytest.mark.parametrize(

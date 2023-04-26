@@ -3,14 +3,6 @@ import time
 from collections import deque
 from typing import Optional
 
-def check_start_matrix(n: int, p: int, start_matrix: np.ndarray) -> None:
-    # if start_matrix.shape[0] != start_matrix.shape[1]:
-    #     raise ValueError(f"{start_matrix=} must be square.")
-    # if not np.all(start_matrix >= 0):
-    #     raise ValueError(f"{start_matrix=} must be positive.")
-    if not np.linalg.det(start_matrix) % p == 1:
-        raise ValueError(f"{start_matrix=} must have determinant 1 mod {p}.")
-
 def get_edges(n: int, p: int) -> np.ndarray:
     "Starting edges of graph."
 
@@ -63,7 +55,7 @@ class Search:
         self.quit = False
         self.stop = stop
 
-    def do_work(self) -> None:
+    def worker(self) -> None:
         x = self.queue.popleft()
 
         Xes = np.matmul(x, self.edges)
@@ -89,21 +81,26 @@ class Search:
 
             
 
-    def worker(self) -> None:
+    def do_work(self) -> None:
         while self.queue:
-            self.do_work()
+            self.worker()
 
             if self.quit:
                 break
 
     def main(self):
         if self.start_matrix is not None:
-            # check_start_matrix(self.n, self.p, self.start_matrix)
             self.queue = deque([self.start_matrix])
+            x_tup = tuple(np.ravel(self.start_matrix))
+            self.s.add(x_tup)
+            self.count += 1
+            if self.stop is not None and self.count >= self.stop:
+                self.quit = True
+                return self.s
         else:
             self.queue = deque(self.edges)
 
-        self.worker()
+        self.do_work()
 
         return self.s
 
@@ -113,7 +110,7 @@ def time_set_bfs():
     instance = Search(n=2, p=101, printing=True)
     my_set = instance.main()
     t1 = time.time()
-    print(f"{t1-t0=}")
+    print(f" t_1 - t_0 = {t1-t0}")
     print(f"size of set_bfs = {len(my_set)}")
     print("\n")
 
