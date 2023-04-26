@@ -23,7 +23,7 @@ class Get_queue:
         if starting_matrix is not None:
             self.s.add(tuple(np.ravel(starting_matrix)))
         self.printing = printing
-        self.starting_matrix=starting_matrix
+        self.starting_matrix = starting_matrix
         self.edges = get_edges(n, p)
         self.count = 0
         self.quit = False
@@ -36,7 +36,6 @@ class Get_queue:
         Xes %= self.p
 
         for Xe in Xes:
-            
             Xe_tup = tuple(np.ravel(Xe))
 
             if Xe_tup not in self.s:
@@ -47,13 +46,10 @@ class Get_queue:
                 if self.count % 100_000 == 0 and self.printing:
                     print(f"on number {self.count=}")
 
-
                 if self.stop is not None and self.count >= self.stop:
                     self.quit = True
                     break
-                
 
-            
     def do_work(self) -> None:
         while self.queue:
             self.worker()
@@ -96,19 +92,20 @@ def get_matrix(
     printing: bool = False,
 ):
     """Get pretty random matrix."""
-    instance = Get_queue(n=n, p=p, stop=stop, printing=printing, starting_matrix=starting_matrix)
+    instance = Get_queue(
+        n=n, p=p, stop=stop, printing=printing, starting_matrix=starting_matrix
+    )
     my_queue = instance.main()
     m1_tup = my_queue.pop()
     len_my_queue = len(my_queue)
 
-    
     if len_my_queue > 1:
         for _ in range(np.random.randint(1, len_my_queue)):
             m2_tup = my_queue.pop()
-    else: 
+    else:
         m2_tup = m1_tup
     m1 = tuple2matrix(m1_tup, n)
-    m2 =  tuple2matrix(m2_tup, n)
+    m2 = tuple2matrix(m2_tup, n)
     m = np.matmul(m1, m2)
     return m
 

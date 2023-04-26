@@ -123,7 +123,7 @@ def boundary_set(my_set):
     wrong = 0  # number of wrong matrices
     boundary = set()
     # for X in my_set:
-        # wrong = add_edges(boundary, X, wrong)
+    # wrong = add_edges(boundary, X, wrong)
     print(f"{wrong=}")
     print(f"size of boundary = {len(boundary)}")  # actual size of boundary
     return boundary

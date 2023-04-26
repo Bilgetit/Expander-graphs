@@ -3,6 +3,7 @@ import time
 from collections import deque
 from typing import Optional
 
+
 def get_edges(n: int, p: int) -> np.ndarray:
     "Starting edges of graph."
 
@@ -49,7 +50,7 @@ class Search:
         if start_matrix is not None:
             self.s.add(tuple(np.ravel(start_matrix)))
         self.printing = printing
-        self.start_matrix=start_matrix
+        self.start_matrix = start_matrix
         self.edges = get_edges(n, p)
         self.count = 0
         self.quit = False
@@ -62,7 +63,6 @@ class Search:
         Xes %= self.p
 
         for Xe in Xes:
-            
             Xe_tup = tuple(np.ravel(Xe))
 
             if Xe_tup not in self.s:
@@ -73,13 +73,9 @@ class Search:
                 if self.count % 100_000 == 0 and self.printing:
                     print(f"on number {self.count=}")
 
-
                 if self.stop is not None and self.count >= self.stop:
                     self.quit = True
                     break
-                
-
-            
 
     def do_work(self) -> None:
         while self.queue:

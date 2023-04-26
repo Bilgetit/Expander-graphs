@@ -13,7 +13,7 @@ def find_boundary(
 ) -> set[tuple]:
     """Find boundary of set. Return boundary as set of tuples, along with its size."""
     if not subset:
-        subset = get_graph(n, p, start_matrix=starting_matrix, stop = size)
+        subset = get_graph(n, p, start_matrix=starting_matrix, stop=size)
     edges = get_edges(n, p)
 
     if not size:
