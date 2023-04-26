@@ -19,7 +19,7 @@ def find_boundary(
     if not size:
         size = len(subset)
 
-    boundary = set(subset)
+    boundary: set[tuple] = set()
 
     for Xtup in subset:
         X = tuple2matrix(Xtup, n)
@@ -27,7 +27,6 @@ def find_boundary(
         Xes %= p
         for Xe in Xes:
             Xe_tup = tuple(np.ravel(Xe))
-            if Xe_tup not in boundary:
+            if Xe_tup not in subset:
                 boundary.add(Xe_tup)
-                size += 1
-    return boundary, size
+    return boundary
