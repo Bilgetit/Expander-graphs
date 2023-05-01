@@ -26,6 +26,8 @@ primes = [2, 3, 5]
 
 # primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101]
 primes = [5, 7, 11, 13, 17, 19, 23]
+
+
 @pytest.mark.parametrize("n, p", [(2, p) for p in primes])
 def test_size(n, p):
     """test that the size of the graph is correct"""
@@ -71,6 +73,7 @@ def test_start_matrix(n, p):
     m2_tup = tuple(np.ravel(start_matrix2))
     assert m1_tup != m2_tup
 
+
 @pytest.mark.parametrize(
     "n, p",
     [(n, p) for n in range(2, 4) for p in primes],
@@ -79,9 +82,10 @@ def test_graph(n, p):
     """test that the graphs are different when the starting matrix is different"""
     start_matrix1 = get_matrix(n, p, stop=100)
     start_matrix2 = get_matrix(n, p, stop=100, starting_matrix=start_matrix1)
-    graph1 = get_graph(n, p, stop=10, start_matrix = start_matrix1)
-    graph2 = get_graph(n, p, stop=10, start_matrix = start_matrix2)
+    graph1 = get_graph(n, p, stop=10, start_matrix=start_matrix1)
+    graph2 = get_graph(n, p, stop=10, start_matrix=start_matrix2)
     assert graph1 != graph2
+
 
 @pytest.mark.parametrize(
     "n, p",
@@ -94,7 +98,3 @@ def test_boundary(n, p):
     boundary1 = find_boundary(n, p, size=10, starting_matrix=start_matrix1)
     boundary2 = find_boundary(n, p, size=10, starting_matrix=start_matrix2)
     assert boundary1 != boundary2
-
-
-
-

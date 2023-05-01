@@ -9,23 +9,32 @@ from random_matrix import get_matrix
 from size import degree
 
 
-def random_matrices(n: int, p: int, times:int, start_matrix: Optional[np.ndarray] = [], matrix_end: Optional[int] = None) -> list[np.ndarray]:
+def random_matrices(
+    n: int,
+    p: int,
+    times: int,
+    start_matrix: Optional[np.ndarray] = [],
+    matrix_end: Optional[int] = None,
+) -> list[np.ndarray]:
     """generates random matrices."""
 
     if matrix_end == None:
         stop = 1
         # stop = np.random.randint(1, 500)
-    
+
     else:
         stop = matrix_end
 
     if start_matrix == []:
-        start_matrix.append(get_matrix(n, p, stop=stop))        
+        start_matrix.append(get_matrix(n, p, stop=stop))
 
     for i in range(1, times):
-        start_matrix.append(get_matrix(n, p, stop=stop, starting_matrix=start_matrix[i-1]))
-    
+        start_matrix.append(
+            get_matrix(n, p, stop=stop, starting_matrix=start_matrix[i - 1])
+        )
+
     return start_matrix
+
 
 class estimate:
     """class for estimating c, generating random subsets, and calculating the edges."""
@@ -82,7 +91,7 @@ class estimate:
         else:
             self.subset_stop = np.random.randint(1, self.degree - 1)
             """stop will be the size of the subset we are taking the boundary of."""
-            
+
         boundary = find_boundary(
             self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
         )
@@ -94,26 +103,10 @@ class estimate:
         with Pool() as pool:
             self.c = pool.map(self.worker, range(self.times))
 
-    def random_matrices(self):
-        """generates random matrices."""
-
-        if self.matrix_end == None:
-            self.stop = 1
-            # self.stop = np.random.randint(1, 500)
-        
-        else:
-            self.stop = self.matrix_end
-
-        if self.start_matrix == []:
-            self.start_matrix.append(get_matrix(self.n, self.p, stop=self.stop))        
-
-        for i in range(1, self.times):
-            self.start_matrix.append(get_matrix(self.n, self.p, stop=self.stop, starting_matrix=self.start_matrix[i-1]))
-
     def main(self):
-
-        # self.random_matrices()
-        self.start_matrix = random_matrices(self.n, self.p, self.times, self.start_matrix, self.matrix_end)
+        self.start_matrix = random_matrices(
+            self.n, self.p, self.times, self.start_matrix, self.matrix_end
+        )
         if self.parallel:
             self.do_work()
             c = min(self.c)
@@ -164,6 +157,6 @@ def get_c(
 
 if __name__ == "__main__":
     # time_estimate_c(3, 5, times=100, subset_end = None)
-    time_estimate_c(3, 5, times=2, subset_end = 100_000, parallel=False)
+    time_estimate_c(3, 5, times=2, subset_end=100_000, parallel=False)
     # time_estimate_c(3, 5, times=2, subset_end = 35)
     # time_estimate_c(2, 11, times=100, parallel=False)
