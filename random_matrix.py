@@ -107,6 +107,7 @@ def get_matrix(
     m1 = tuple2matrix(m1_tup, n)
     m2 = tuple2matrix(m2_tup, n)
     m = np.matmul(m1, m2)
+    m %= p
     return m
 
 

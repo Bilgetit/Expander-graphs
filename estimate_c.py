@@ -9,6 +9,24 @@ from random_matrix import get_matrix
 from size import degree
 
 
+def random_matrices(n: int, p: int, times:int, start_matrix: Optional[np.ndarray] = [], matrix_end: Optional[int] = None) -> list[np.ndarray]:
+    """generates random matrices."""
+
+    if matrix_end == None:
+        stop = 1
+        # stop = np.random.randint(1, 500)
+    
+    else:
+        stop = matrix_end
+
+    if start_matrix == []:
+        start_matrix.append(get_matrix(n, p, stop=stop))        
+
+    for i in range(1, times):
+        start_matrix.append(get_matrix(n, p, stop=stop, starting_matrix=start_matrix[i-1]))
+    
+    return start_matrix
+
 class estimate:
     """class for estimating c, generating random subsets, and calculating the edges."""
 
@@ -26,87 +44,83 @@ class estimate:
         self.p = p
         self.times = times
         self.subset_end = subset_end
+        self.start_matrix = []
         self.matrix_end = matrix_end
-        self.start_matrix = start_matrix
         self.parallel = parallel
         self.degree = degree(self.n, self.p)
-        self.c = None
+        self.c = []
 
-    def serial_worker(self):
-        """worker for multiprocessing. Estimates single c."""
+        if start_matrix is not None:
+            self.start_matrix = [start_matrix]
+
+    def serial_worker(self, i: int):
+        """worker without multiprocessing. Estimates single c."""
         if self.subset_end is not None:
-            self.subset_stop = np.random.randint(1, self.subset_end - 1)
+            # self.subset_stop = np.random.randint(1, self.subset_end - 1)
+            self.subset_stop = self.subset_end
         else:
             self.subset_stop = np.random.randint(1, self.degree - 1)
             """stop will be the size of the subset we are taking the boundary of."""
 
-        if self.start_matrix is not None:
-            # self.stop = np.random.randint(1, 500)
-            self.start_matrix = get_matrix(
-                self.n, self.p, stop=self.stop, starting_matrix=self.start_matrix
-            )
-            """get_matrix now starts from a random matrix in the graph, given by the last self.start_matrix."""
-        else:
-            # self.stop = np.random.randint(1, 500)
-            self.stop = 300
-            self.start_matrix = get_matrix(self.n, self.p, stop=self.stop)
-
         boundary = find_boundary(
-            self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix
+            self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
         )
         c = len(boundary) / ((1 - self.subset_stop / self.degree) * self.subset_stop)
 
-        if c < self.c:
-            self.c = c
+        self.c.append(c)
 
     def serial_do_work(self):
-        for _ in range(self.times):
-            self.serial_worker()
+        """function without multiprocessing."""
+        for i in range(self.times):
+            self.serial_worker(i)
 
-    def worker(self, _):
+    def worker(self, i: int):
         """worker for multiprocessing. Estimates single c."""
-        if self.subset_end is not None:
-            self.subset_stop = np.random.randint(1, self.subset_end - 1)
+        if self.subset_end is not None and self.subset_end < self.degree:
+            # self.subset_stop = np.random.randint(1, self.subset_end - 1)
+            self.subset_stop = self.subset_end
         else:
             self.subset_stop = np.random.randint(1, self.degree - 1)
             """stop will be the size of the subset we are taking the boundary of."""
-
-        if self.start_matrix is not None:
-            # self.stop = np.random.randint(1, 500)
-            self.start_matrix = get_matrix(
-                self.n, self.p, stop=self.stop, starting_matrix=self.start_matrix
-            )
-            """get_matrix now starts from a random matrix in the graph, given by the last self.start_matrix."""
-        else:
-            # self.stop = np.random.randint(1, 500)
-            self.stop = 100
-            self.start_matrix = get_matrix(self.n, self.p, stop=self.stop)
-
+            
         boundary = find_boundary(
-            self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix
+            self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
         )
         c = len(boundary) / ((1 - self.subset_stop / self.degree) * self.subset_stop)
 
         return c
-        # if c < self.c:
-        #     self.c = c
-
-    # def do_work(self):
-    #     for _ in range(self.times):
-    #         self.worker()
 
     def do_work(self):
         with Pool() as pool:
             self.c = pool.map(self.worker, range(self.times))
 
+    def random_matrices(self):
+        """generates random matrices."""
+
+        if self.matrix_end == None:
+            self.stop = 1
+            # self.stop = np.random.randint(1, 500)
+        
+        else:
+            self.stop = self.matrix_end
+
+        if self.start_matrix == []:
+            self.start_matrix.append(get_matrix(self.n, self.p, stop=self.stop))        
+
+        for i in range(1, self.times):
+            self.start_matrix.append(get_matrix(self.n, self.p, stop=self.stop, starting_matrix=self.start_matrix[i-1]))
+
     def main(self):
+
+        # self.random_matrices()
+        self.start_matrix = random_matrices(self.n, self.p, self.times, self.start_matrix, self.matrix_end)
         if self.parallel:
             self.do_work()
             c = min(self.c)
-            return c
+            return self.c
         else:
-            self.c = 100
             self.serial_do_work()
+            c = min(self.c)
             return self.c
 
 
@@ -130,7 +144,7 @@ def time_estimate_c(
     )
     c = instance.main()
     t_1 = time.perf_counter()
-    print(f"n = {n}, p = {p}, times = {times}")
+    print(f"n = {n}, p = {p}, times = {times}, subset_end = {subset_end}")
     print(f"t_1 - t_0 = {t_1-t_0}")
     print(f"c = {c}")
     print("\n")
@@ -149,5 +163,7 @@ def get_c(
 
 
 if __name__ == "__main__":
-    time_estimate_c(2, 11, times=100)
-    time_estimate_c(2, 11, times=100, parallel=False)
+    # time_estimate_c(3, 5, times=100, subset_end = None)
+    time_estimate_c(3, 5, times=2, subset_end = 100_000, parallel=False)
+    # time_estimate_c(3, 5, times=2, subset_end = 35)
+    # time_estimate_c(2, 11, times=100, parallel=False)
