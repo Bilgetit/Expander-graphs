@@ -2,7 +2,7 @@ from numba import jit
 import pytest
 import random
 import numpy as np
-from tuple_graph import get_graph
+from tuple_graph import get_graph, get_edges
 from boundary import find_boundary
 from random_matrix import get_matrix
 from size import degree
@@ -28,7 +28,10 @@ primes = [2, 3, 5]
 primes = [5, 7, 11, 13, 17, 19, 23]
 
 
-@pytest.mark.parametrize("n, p", [(2, p) for p in primes])
+@pytest.mark.parametrize(
+        "n, p", 
+        [(n, p) for n in range(2, 3) for p in primes]
+)
 def test_size(n, p):
     """test that the size of the graph is correct"""
     graph = get_graph(n, p)
@@ -91,10 +94,35 @@ def test_graph(n, p):
     "n, p",
     [(n, p) for n in range(2, 4) for p in primes],
 )
-def test_boundary(n, p):
+def test_diff_boundary(n, p):
     """test that the boundary is different when the starting matrix is different"""
     start_matrix1 = get_matrix(n, p, stop=100)
     start_matrix2 = get_matrix(n, p, stop=100, starting_matrix=start_matrix1)
     boundary1 = find_boundary(n, p, size=10, starting_matrix=start_matrix1)
     boundary2 = find_boundary(n, p, size=10, starting_matrix=start_matrix2)
     assert boundary1 != boundary2
+
+
+@pytest.mark.parametrize(
+    "n, p",
+    [(n, p) for n in range(2, 4) for p in primes],
+)
+def test_boundary(n,p):
+    """test that the boundary is not in the subset"""
+    edges = get_edges(n, p)
+    start_matrix = get_matrix(n, p, stop=100)
+    boundary, subset = find_boundary(n, p, size=10, starting_matrix=start_matrix)
+    for m in boundary:
+        assert m not in subset
+        in_subset = False
+        for e in edges:
+            m = tuple2matrix(m, n)
+            em = np.matmul(m, e)
+            em %= p
+            em_tup = tuple(np.ravel(em))
+            if em_tup in subset:
+                in_subset = True
+                break
+        assert in_subset == True
+
+    

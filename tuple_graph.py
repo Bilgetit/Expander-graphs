@@ -17,6 +17,7 @@ def get_edges(n: int, p: int) -> np.ndarray:
         B_2 %= p
 
         return np.array([A_2, Ai_2, B_2, Bi_2])
+        # return np.array([A_2, B_2])
 
     elif n == 3:
         A_3 = np.array([[1, 1, 0], [0, 1, 0], [0, 0, 1]])
@@ -28,6 +29,35 @@ def get_edges(n: int, p: int) -> np.ndarray:
 
         return np.array([A_3, Ai_3, B_3, Bi_3])
         # return np.array([A_3, B_3])
+
+    else:
+        raise ValueError(f"Not implemented for {n=}.")
+    
+def get_edges_half(n: int, p: int) -> np.ndarray:
+    "Starting edges of graph."
+
+    if n == 2:
+        A_2 = np.array([[1, 1], [0, 1]])
+        # Ai_2 = np.array([[1, -1], [0, 1]])
+        B_2 = np.array([[0, 1], [-1, 0]])
+        # Bi_2 = np.array([[0, -1], [1, 0]])
+
+        # Ai_2 %= p
+        B_2 %= p
+
+        # return np.array([A_2, Ai_2, B_2, Bi_2])
+        return np.array([A_2, B_2])
+
+    elif n == 3:
+        A_3 = np.array([[1, 1, 0], [0, 1, 0], [0, 0, 1]])
+        # Ai_3 = np.array([[1, -1, 0], [0, 1, 0], [0, 0, 1]])
+        B_3 = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+        # Bi_3 = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]])
+
+        # Ai_3 %= p
+
+        # return np.array([A_3, Ai_3, B_3, Bi_3])
+        return np.array([A_3, B_3])
 
     else:
         raise ValueError(f"Not implemented for {n=}.")
