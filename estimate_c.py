@@ -5,35 +5,19 @@ import time
 from tuple_graph import get_graph, get_edges
 from tuple2matrix import tuple2matrix
 from boundary import find_boundary
-from random_matrix import get_matrix
+from random_matrix import random_matrices
 from size import degree
 
 
-def random_matrices(
-    n: int,
-    p: int,
-    times: int,
-    start_matrix: Optional[np.ndarray] = [],
-    matrix_end: Optional[int] = None,
-) -> list[np.ndarray]:
-    """generates random matrices."""
-
-    if matrix_end == None:
-        stop = 1
-        # stop = np.random.randint(1, 500)
-
-    else:
-        stop = matrix_end
-
-    if start_matrix == []:
-        start_matrix.append(get_matrix(n, p, stop=stop))
-
-    for i in range(1, times):
-        start_matrix.append(
-            get_matrix(n, p, stop=stop, starting_matrix=start_matrix[i - 1])
-        )
-
-    return start_matrix
+def get_rand_subset(
+    n: int, p: int, subset_stop: int, matrix_list: Optional[np.ndarray] = []
+) -> set[tuple]:
+    """get random subset of graph"""
+    subset = set()
+    matrices = random_matrices(n=n, p=p, times=subset_stop, matrix_list=matrix_list)
+    for j in range(subset_stop):
+        subset.add(tuple(np.ravel(matrices[j])))
+    return subset
 
 
 class estimate:
@@ -64,18 +48,22 @@ class estimate:
 
     def serial_worker(self, i: int):
         """worker without multiprocessing. Estimates single c."""
-        if self.subset_end is not None:
+        if self.subset_end is not None and self.subset_end < self.degree:
             # self.subset_stop = np.random.randint(1, self.subset_end - 1)
             self.subset_stop = self.subset_end
         else:
             self.subset_stop = np.random.randint(1, self.degree - 1)
             """stop will be the size of the subset we are taking the boundary of."""
 
-        boundary = find_boundary(
+        # subset = get_rand_subset(self.n, self.p, self.subset_stop)
+        # boundary, _ = find_boundary(self.n, self.p, subset=subset)
+        # c = len(boundary) / ((1 - len(subset) / self.degree) * len(subset))
+        # self.c.append(c)
+
+        boundary, _ = find_boundary(
             self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
         )
         c = len(boundary) / ((1 - self.subset_stop / self.degree) * self.subset_stop)
-
         self.c.append(c)
 
     def serial_do_work(self):
@@ -85,6 +73,7 @@ class estimate:
 
     def worker(self, i: int):
         """worker for multiprocessing. Estimates single c."""
+
         if self.subset_end is not None and self.subset_end < self.degree:
             # self.subset_stop = np.random.randint(1, self.subset_end - 1)
             self.subset_stop = self.subset_end
@@ -92,11 +81,17 @@ class estimate:
             self.subset_stop = np.random.randint(1, self.degree - 1)
             """stop will be the size of the subset we are taking the boundary of."""
 
-        boundary = find_boundary(
-            self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
-        )
-        c = len(boundary) / ((1 - self.subset_stop / self.degree) * self.subset_stop)
+        graph = get_graph(self.n, self.p)
+        subset = np.random.choice(tuple(graph), size=self.subset_stop)
 
+        # boundary, subset = find_boundary(
+        #     self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
+        # )
+        boundary, _ = find_boundary(self.n, self.p, subset=subset)
+
+        # c = len(boundary) / ((1 - self.subset_stop / self.degree) * self.subset_stop)
+        c = len(boundary) / ((1 - len(subset) / self.degree) * len(subset))
+        print("hi")
         return c
 
     def do_work(self):
@@ -157,6 +152,6 @@ def get_c(
 
 if __name__ == "__main__":
     # time_estimate_c(3, 5, times=100, subset_end = None)
-    time_estimate_c(3, 5, times=2, subset_end=100_000, parallel=False)
+    time_estimate_c(3, 5, times=2, subset_end=1_000, parallel=False)
     # time_estimate_c(3, 5, times=2, subset_end = 35)
     # time_estimate_c(2, 11, times=100, parallel=False)

@@ -1,9 +1,33 @@
 import numpy as np
 import time
+import random
 from collections import deque
 from typing import Optional
 from tuple2matrix import tuple2matrix
 from tuple_graph import get_edges
+
+
+def random_matrices(
+    n: int,
+    p: int,
+    times: int,
+    matrix_list: Optional[np.ndarray] = [],
+    matrix_end: Optional[int] = None,
+) -> list[np.ndarray]:
+    """generates random matrices."""
+
+    # if matrix_end == None:
+    #     # stop = 1
+    #     stop = np.random.randint(1, 500)
+    # else:
+    #     stop = matrix_end
+    # if matrix_list == []:
+    matrix_list = []
+    matrix_list.append(get_matrix(n, p))
+    for i in range(1, times):
+        matrix = get_matrix(n, p, starting_matrix=matrix_list[-1])
+        matrix_list.append(matrix)
+    return matrix_list
 
 
 class Get_queue:
@@ -20,8 +44,6 @@ class Get_queue:
         self.n = n
         self.p = p
         self.s = set()
-        if starting_matrix is not None:
-            self.s.add(tuple(np.ravel(starting_matrix)))
         self.printing = printing
         self.starting_matrix = starting_matrix
         self.edges = get_edges(n, p)
@@ -46,7 +68,7 @@ class Get_queue:
                 if self.count % 100_000 == 0 and self.printing:
                     print(f"on number {self.count=}")
 
-                if self.stop is not None and self.count >= self.stop:
+                if self.count >= self.stop:
                     self.quit = True
                     break
 
@@ -63,7 +85,7 @@ class Get_queue:
             x_tup = tuple(np.ravel(self.starting_matrix))
             self.s.add(x_tup)
             self.count += 1
-            if self.stop is not None and self.count >= self.stop:
+            if self.count >= self.stop:
                 self.quit = True
                 return self.queue
         else:
@@ -87,23 +109,29 @@ def time_mat_bfs():
 def get_matrix(
     n: int,
     p: int,
-    stop: int = 500,
+    stop: Optional[int] = None,
     starting_matrix: Optional[np.ndarray] = None,
     printing: bool = False,
 ):
     """Get pretty random matrix."""
+    if stop == None:
+        stop = np.random.randint(1, 300)
+
     instance = Get_queue(
         n=n, p=p, stop=stop, printing=printing, starting_matrix=starting_matrix
     )
     my_queue = instance.main()
-    m1_tup = my_queue.pop()
-    len_my_queue = len(my_queue)
+    # m1_tup = my_queue.pop()
+    m1_tup = random.choice(my_queue)
+    m2_tup = random.choice(my_queue)
 
-    if len_my_queue > 1:
-        for _ in range(np.random.randint(1, len_my_queue)):
-            m2_tup = my_queue.pop()
-    else:
-        m2_tup = m1_tup
+    # len_my_queue = len(my_queue)
+    # if len_my_queue > 1:
+    #     for _ in range(np.random.randint(1, len_my_queue)):
+    #         m2_tup = my_queue.pop()
+    # else:
+    #     m2_tup = m1_tup
+
     m1 = tuple2matrix(m1_tup, n)
     m2 = tuple2matrix(m2_tup, n)
     m = np.matmul(m1, m2)
