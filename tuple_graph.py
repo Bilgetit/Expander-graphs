@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import random
 from collections import deque
 from typing import Optional
 
@@ -32,7 +33,8 @@ def get_edges(n: int, p: int) -> np.ndarray:
 
     else:
         raise ValueError(f"Not implemented for {n=}.")
-    
+
+
 def get_edges_half(n: int, p: int) -> np.ndarray:
     "Starting edges of graph."
 
@@ -81,14 +83,13 @@ class Search:
             self.s.add(tuple(np.ravel(start_matrix)))
         self.printing = printing
         self.start_matrix = start_matrix
-        self.edges = get_edges(n, p)
+        self.edges = get_edges_half(n, p)
         self.count = 0
         self.quit = False
         self.stop = stop
 
     def worker(self) -> None:
         x = self.queue.popleft()
-
         Xes = np.matmul(x, self.edges)
         Xes %= self.p
 

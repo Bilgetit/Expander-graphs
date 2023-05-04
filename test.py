@@ -21,17 +21,14 @@ from tuple2matrix import tuple2matrix
 
 # print(totuple(ra))
 
-primes = [2, 3, 5]
+# primes = [2, 3, 5]
 
 
 # primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101]
 primes = [5, 7, 11, 13, 17, 19, 23]
 
 
-@pytest.mark.parametrize(
-        "n, p", 
-        [(n, p) for n in range(2, 3) for p in primes]
-)
+@pytest.mark.parametrize("n, p", [(n, p) for n in range(2, 3) for p in primes])
 def test_size(n, p):
     """test that the size of the graph is correct"""
     graph = get_graph(n, p)
@@ -107,7 +104,7 @@ def test_diff_boundary(n, p):
     "n, p",
     [(n, p) for n in range(2, 4) for p in primes],
 )
-def test_boundary(n,p):
+def test_boundary(n, p):
     """test that the boundary is not in the subset"""
     edges = get_edges(n, p)
     start_matrix = get_matrix(n, p, stop=100)
@@ -124,5 +121,3 @@ def test_boundary(n,p):
                 in_subset = True
                 break
         assert in_subset == True
-
-    
