@@ -29,4 +29,4 @@ def find_boundary(
             Xe_tup = tuple(np.ravel(Xe))
             if Xe_tup not in subset:
                 boundary.add(Xe_tup)
-    return boundary
+    return boundary, subset
