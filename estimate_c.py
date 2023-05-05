@@ -27,8 +27,8 @@ class estimate:
         self,
         n: int = 3,
         p: int = 5,
-        times: int = 1000,
-        parallel: bool = True,
+        times: int = 1,
+        parallel: bool = False,
         subset_end: Optional[int] = None,
         matrix_end: Optional[int] = None,
         start_matrix: Optional[np.ndarray] = None,
@@ -60,10 +60,10 @@ class estimate:
         # c = len(boundary) / ((1 - len(subset) / self.degree) * len(subset))
         # self.c.append(c)
 
-        boundary, _ = find_boundary(
+        boundary, subset = find_boundary(
             self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
         )
-        c = len(boundary) / ((1 - self.subset_stop / self.degree) * self.subset_stop)
+        c = len(boundary) / ((1 - len(subset) / self.degree) * len(subset))
         self.c.append(c)
 
     def serial_do_work(self):
@@ -108,7 +108,8 @@ class estimate:
             return self.c
         else:
             self.serial_do_work()
-            c = min(self.c)
+            # min_c = min(self.c)
+            # max_c = max(self.c)
             return self.c
 
 
@@ -116,7 +117,7 @@ def time_estimate_c(
     n: int,
     p: int,
     times: int = 100,
-    parallel: bool = True,
+    parallel: bool = False,
     subset_end: Optional[int] = None,
     start_matrix: Optional[np.ndarray] = None,
 ) -> list[float]:
@@ -141,17 +142,25 @@ def time_estimate_c(
 def get_c(
     n: int,
     p: int,
-    times: int = 100,
+    times: int = 1,
     subset_end: Optional[int] = None,
     start_matrix: Optional[np.ndarray] = None,
+    parallel: bool = False,
 ) -> float:
-    instance = estimate(n, p, times, subset_end, start_matrix)
+    instance = estimate(
+        n=n,
+        p=p,
+        times=times,
+        subset_end=subset_end,
+        start_matrix=start_matrix,
+        parallel=parallel,
+    )
     c = instance.main()
     return c
 
 
 if __name__ == "__main__":
     # time_estimate_c(3, 5, times=100, subset_end = None)
-    time_estimate_c(3, 5, times=2, subset_end=1_000, parallel=False)
+    time_estimate_c(2, 11, times=1, subset_end=1056, parallel=False)
     # time_estimate_c(3, 5, times=2, subset_end = 35)
     # time_estimate_c(2, 11, times=100, parallel=False)

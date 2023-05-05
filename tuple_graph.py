@@ -83,7 +83,7 @@ class Search:
             self.s.add(tuple(np.ravel(start_matrix)))
         self.printing = printing
         self.start_matrix = start_matrix
-        self.edges = get_edges_half(n, p)
+        self.edges = get_edges(n, p)
         self.count = 0
         self.quit = False
         self.stop = stop
