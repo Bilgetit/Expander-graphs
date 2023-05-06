@@ -155,7 +155,7 @@ def get_c(
         start_matrix=start_matrix,
         parallel=parallel,
     )
-    c = instance.main()
+    c = min(instance.main())
     return c
 
 
