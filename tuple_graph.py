@@ -89,8 +89,8 @@ class Search:
         self.stop = stop
 
     def worker(self) -> None:
-        x = self.queue.popleft()
-        Xes = np.matmul(x, self.edges)
+        X = self.queue.popleft()
+        Xes = np.matmul(X, self.edges)
         Xes %= self.p
 
         for Xe in Xes:
@@ -101,12 +101,12 @@ class Search:
                 self.queue.append(Xe)
                 self.count += 1
 
-                if self.count % 100_000 == 0 and self.printing:
-                    print(f"on number {self.count=}")
+            if self.count % 100_000 == 0 and self.printing:
+                print(f"on number {self.count=}")
 
-                if self.stop is not None and self.count >= self.stop:
-                    self.quit = True
-                    break
+            if self.stop is not None and self.count >= self.stop:
+                self.quit = True
+                break
 
     def do_work(self) -> None:
         while self.queue:

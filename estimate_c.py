@@ -37,14 +37,14 @@ class estimate:
         self.p = p
         self.times = times
         self.subset_end = subset_end
-        self.start_matrix = []
+        self.start_matrix = None
         self.matrix_end = matrix_end
         self.parallel = parallel
         self.degree = degree(self.n, self.p)
         self.c = []
 
         if start_matrix is not None:
-            self.start_matrix = [start_matrix]
+            self.start_matrix = start_matrix
 
     def serial_worker(self, i: int):
         """worker without multiprocessing. Estimates single c."""
@@ -61,7 +61,7 @@ class estimate:
         # self.c.append(c)
 
         boundary, subset = find_boundary(
-            self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix[i]
+            self.n, self.p, size=self.subset_stop, starting_matrix=self.start_matrix
         )
         c = len(boundary) / ((1 - len(subset) / self.degree) * len(subset))
         self.c.append(c)
@@ -99,12 +99,9 @@ class estimate:
             self.c = pool.map(self.worker, range(self.times))
 
     def main(self):
-        self.start_matrix = random_matrices(
-            self.n, self.p, self.times, self.start_matrix, self.matrix_end
-        )
         if self.parallel:
             self.do_work()
-            c = min(self.c)
+            # c = min(self.c)
             return self.c
         else:
             self.serial_do_work()

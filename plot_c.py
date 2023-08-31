@@ -2,6 +2,7 @@ import numpy as np
 from typing import Optional
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
+import pandas as pd
 from matplotlib import cm
 from multiprocessing import Pool
 from sympy import isprime
@@ -21,7 +22,7 @@ def plot_c_against_A(n: int = 3, p: int = 5, plot = False) -> None:
         fig = plt.figure(1, (7, 4))
         ax = fig.add_subplot(1, 1, 1)
         ax.plot(ratio, c)
-        ax.xaxis.set_major_formatter(mtick.ratioentFormatter())
+        ax.xaxis.set_major_formatter(mtick.percentFormatter())
         plt.xlabel("|A|")
         plt.ylabel("c")
         plt.show()
@@ -41,8 +42,8 @@ def plot_c_against_p(n: int, max_p:int = 50, ratio: float = 0.15, plot: bool = F
         plt.show()
     return c
 
-def plot_c_3d(n: int = 2, max_p: int = 101, min_ratio: float = 0.01, max_ratio: float = 0.2, plot: bool = True, filename: str = 'FigOb2.fig.pickle') -> None:
-    primes = [i for i in range(11, max_p) if isprime(i)]
+def plot_c_3d(n: int = 2, max_p: int = 101, min_ratio: float = 0.01, max_ratio: float = 0.2, filename: str = 'FigOb2.fig.pickle') -> None:
+    primes = [i for i in range(7, max_p) if isprime(i)]
     X = np.array(primes)
     length = int(len(primes))
     ratio = np.linspace(min_ratio, max_ratio, length)
@@ -50,8 +51,8 @@ def plot_c_3d(n: int = 2, max_p: int = 101, min_ratio: float = 0.01, max_ratio: 
     X, Y = np.meshgrid(X, Y)
 
     # c = []
-    # for ratioent in ratio:
-    #     c.append(np.array(c_worker(n=n, primes=primes, ratio=ratioent)))
+    # for percent in ratio:
+    #     c.append(np.array(c_worker(n=n, primes=primes, ratio=percent)))
 
     with Pool() as pool:
         c = pool.starmap(c_worker, [(n, primes, i) for i in ratio])
@@ -66,17 +67,16 @@ def plot_c_3d(n: int = 2, max_p: int = 101, min_ratio: float = 0.01, max_ratio: 
     print(f"min p: {primes[p_i]}")
     print(f"min ratio: {ratio[ratio_i]}")
 
-    if plot:
-        fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-        surf = ax.plot_surface(X, Y, c, cmap=cm.coolwarm,
-                       linewidth=0, antialiased=False)
-        # ax.scatter(X, Y, c, cmap=cm.coolwarm)
-        # ax.yaxis.set_major_formatter(mtick.ratioentFormatter())
-        plt.xlabel("p")
-        plt.ylabel("|A|/|V|")
-        pickle.dump(fig, open(filename, 'wb'))
-        # plt.clabel("c")
-        # plt.show()
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    surf = ax.plot_surface(X, Y, c, cmap=cm.coolwarm,
+                    linewidth=0, antialiased=False)
+    # ax.scatter(X, Y, c, cmap=cm.coolwarm)
+    # ax.yaxis.set_major_formatter(mtick.percentFormatter())
+    plt.xlabel("p")
+    plt.ylabel("|A|/|V|")
+    pickle.dump(fig, open(filename, 'wb'))
+    # plt.clabel("c")
+    # plt.show()
 
 def c_worker(n: int, primes: np.array, ratio: int) -> float:
     # with Pool() as pool:
@@ -98,14 +98,33 @@ def show_3d_figure(filename: str = 'FigOb2.fig.pickle'):
     fig = pickle.load(open(filename, 'rb'))
     plt.show()
 
+def print_table(n: int = 2, max_p: int = 17, min_ratio: float = 0.01, max_ratio: float = 0.5):
+    primes = [i for i in range(11, max_p) if isprime(i)]
+    # length = int(len(primes))
+    # ratio = np.linspace(min_ratio, max_ratio, length)
+    ratio = np.linspace(min_ratio, max_ratio, 9)
+    with Pool() as pool:
+        c = pool.starmap(c_worker, [(n, primes, i) for i in ratio])
+    # c = [get_c(n=n, p=p, subset_end=int(int(i))) for i in size]
+    strprimes = [str(i) for i in primes]
+    df = pd.DataFrame(c, columns=strprimes, index=ratio)
+    df.index.rename('|A|/|V|', inplace=True)
+    df.to_csv(f"table_{n}_{max_p}_{min_ratio}_{max_ratio}.csv")
+    # df.style
+    # print(df)
+    #{'|A|': ratio, 'c': c}
+    # ['|A|/|V|']
+
 
 if __name__ == "__main__":
     t_0 = time.time()
     # plot_c_against_A(n=2, p=13, plot=True)
-    # plot_c_against_p(n=2, max_p = 150, ratio=0.15, plot=True)
-    # plot_c_3d(n=2, max_p=20, min_ratio=0.01, max_ratio=0.4, plot=True)
+    # plot_c_against_p(n=2, max_p = 150, ratio=0.15)
+    # plot_c_3d(n=2, max_p=101, min_ratio=0.05, max_ratio=0.9)
     # show_3d_figure()
-    show_3d_figure(filename='FigureObject.fig.pickle')
+    # show_3d_figure(filename='FigureObject.fig.pickle')
+
+    print_table(n=3)
     t_1 = time.time()
     print(f"Time taken: {t_1 - t_0}")
     # plt.show()

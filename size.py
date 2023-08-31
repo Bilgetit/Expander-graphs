@@ -11,4 +11,4 @@ def degree(n, p):
 
 
 if __name__ == "__main__":
-    print(degree(2, 5))
+    print(degree(2, 3))
